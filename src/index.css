@@ -1,0 +1,311 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * FriendCatcher Design System
+ * Steve Jobs-era Apple inspired: Radical simplicity, bold typography, purposeful whitespace
+ */
+
+@layer base {
+  html {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-obsidian-950 text-white min-h-screen;
+    /* iOS safe area support */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* Remove default tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Selection color */
+  ::selection {
+    background: rgba(255, 159, 74, 0.3);
+    color: white;
+  }
+}
+
+@layer components {
+  /* ==========================================
+   * TYPOGRAPHY - Bold, Clear Hierarchy
+   * ========================================== */
+
+  .text-massive {
+    @apply text-massive;
+    background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-sunrise {
+    background: linear-gradient(135deg, #ff9f4a 0%, #f97316 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ==========================================
+   * SURFACES - Glass & Cards
+   * ========================================== */
+
+  /* Premium frosted glass */
+  .glass {
+    background: rgba(24, 24, 27, 0.7);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-subtle {
+    background: rgba(24, 24, 27, 0.5);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .glass-light {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-obsidian-800 rounded-card;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .card-elevated {
+    @apply card shadow-medium;
+  }
+
+  .card-interactive {
+    @apply card transition-all duration-base ease-smooth;
+  }
+
+  .card-interactive:active {
+    transform: scale(0.98);
+    @apply shadow-soft;
+  }
+
+  /* ==========================================
+   * BUTTONS - Touch-first, 48px minimum
+   * ========================================== */
+
+  .btn-base {
+    @apply font-medium rounded-button transition-all duration-quick ease-smooth;
+    @apply flex items-center justify-center gap-2;
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .btn-base:active {
+    transform: scale(0.97);
+  }
+
+  .btn-primary {
+    @apply btn-base px-6;
+    background: linear-gradient(135deg, #ff9f4a 0%, #f97316 100%);
+    @apply text-white font-semibold;
+    box-shadow: 0 4px 20px rgba(255, 159, 74, 0.3);
+  }
+
+  .btn-primary:active {
+    box-shadow: 0 2px 12px rgba(255, 159, 74, 0.4);
+  }
+
+  .btn-secondary {
+    @apply btn-base px-6 glass;
+    @apply text-white font-medium;
+  }
+
+  .btn-ghost {
+    @apply btn-base px-4;
+    @apply text-obsidian-400 hover:text-white;
+  }
+
+  /* ==========================================
+   * FORM ELEMENTS - Minimal, Focused
+   * ========================================== */
+
+  .input-base {
+    @apply w-full bg-transparent text-white text-body;
+    @apply border-b-2 border-obsidian-700;
+    @apply transition-all duration-base ease-smooth;
+    @apply outline-none;
+    height: 56px;
+    padding: 24px 0 8px 0;
+  }
+
+  .input-base:focus {
+    @apply border-sunrise-400;
+  }
+
+  .input-base::placeholder {
+    @apply text-obsidian-500;
+  }
+
+  /* ==========================================
+   * LOADING STATES - Subtle, Non-intrusive
+   * ========================================== */
+
+  .skeleton {
+    @apply bg-obsidian-800 rounded-card;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      transparent 100%
+    );
+    animation: shimmer 2.5s ease-in-out infinite;
+  }
+
+  /* ==========================================
+   * AVATAR - Progressive Reveal
+   * ========================================== */
+
+  .avatar {
+    @apply rounded-full flex items-center justify-center relative overflow-hidden;
+    background: linear-gradient(135deg, #3f3f46 0%, #27272a 100%);
+  }
+
+  .avatar-silhouette {
+    @apply avatar;
+    background: linear-gradient(135deg, rgba(113, 113, 122, 0.3) 0%, rgba(63, 63, 70, 0.5) 100%);
+  }
+
+  .avatar-silhouette::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  /* ==========================================
+   * SAFE AREAS - iOS Support
+   * ========================================== */
+
+  .safe-top {
+    padding-top: max(20px, env(safe-area-inset-top));
+  }
+
+  .safe-bottom {
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .safe-x {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+
+  /* ==========================================
+   * SCROLLING - Invisible but Functional
+   * ========================================== */
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .momentum-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ==========================================
+   * UTILITIES - Touch & Selection
+   * ========================================== */
+
+  .touch-target {
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Focus ring for accessibility */
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 159, 74, 0.4);
+  }
+}
+
+@layer utilities {
+  /* Stagger delays for list animations */
+  .stagger-1 { animation-delay: 50ms; }
+  .stagger-2 { animation-delay: 100ms; }
+  .stagger-3 { animation-delay: 150ms; }
+  .stagger-4 { animation-delay: 200ms; }
+  .stagger-5 { animation-delay: 250ms; }
+  .stagger-6 { animation-delay: 300ms; }
+  .stagger-7 { animation-delay: 350ms; }
+  .stagger-8 { animation-delay: 400ms; }
+
+  /* Opacity utilities */
+  .opacity-muted { opacity: 0.6; }
+  .opacity-subtle { opacity: 0.4; }
+  .opacity-faint { opacity: 0.2; }
+}
+
+/* ==========================================
+ * THIRD-PARTY OVERRIDES
+ * ========================================== */
+
+/* MapLibre - Clean integration */
+.maplibregl-ctrl-logo,
+.maplibregl-ctrl-attrib {
+  display: none !important;
+}
+
+.maplibregl-canvas {
+  outline: none;
+}
+
+.maplibregl-popup-content {
+  @apply glass rounded-card p-4;
+  background: rgba(24, 24, 27, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+}
+
+.maplibregl-popup-tip {
+  display: none;
+}
+
+/* Framer Motion - Dev cleanup */
+#__next {
+  isolation: isolate;
+}
