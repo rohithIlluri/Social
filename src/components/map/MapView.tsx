@@ -1,7 +1,9 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import * as THREE from 'three'
 import type { NearbyUser } from '@/types'
 import { haptics } from '@/utils/haptics'
+import { RadarScene } from './three/RadarScene'
+import { BlipParticleSystem } from './three/BlipParticleSystem'
 
 interface MapViewProps {
   latitude: number
@@ -13,16 +15,11 @@ interface MapViewProps {
 }
 
 /**
- * MapView - Three.js radar visualization (Phase 1 scaffold)
+ * MapView - Three.js radar visualization
  *
- * Replaces MapLibre with pure Three.js. This scaffold provides:
- * - Basic scene setup with radar-themed background
- * - Camera positioned for top-down view
- * - Animation loop with proper cleanup
- * - Resize handling
- *
- * Phase 2 will add: RadarScene with rings, sweep, grid
- * Phase 3 will add: BlipParticleSystem for nearby users
+ * Complete radar implementation with:
+ * - RadarScene: rings, sweep, grid, center point, fog
+ * - BlipParticleSystem: GPU particles for nearby users with raycasting
  */
 export function MapView({
   latitude: _latitude,
@@ -36,10 +33,12 @@ export function MapView({
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
+  const clockRef = useRef<THREE.Clock | null>(null)
   const frameIdRef = useRef<number>(0)
-  const [_isReady, setIsReady] = useState(false)
+  const radarSceneRef = useRef<RadarScene | null>(null)
+  const blipSystemRef = useRef<BlipParticleSystem | null>(null)
 
-  // Props will be used in Phase 2/3
+  // Props will be used for future geolocation features
   void _latitude
   void _longitude
   void _radius
@@ -72,28 +71,11 @@ export function MapView({
     containerRef.current.appendChild(renderer.domElement)
     rendererRef.current = renderer
 
-    // Add temporary placeholder elements (will be replaced in Phase 2)
-    // Center point
-    const centerGeometry = new THREE.SphereGeometry(0.2, 32, 32)
-    const centerMaterial = new THREE.MeshBasicMaterial({ color: 0x22c55e })
-    const center = new THREE.Mesh(centerGeometry, centerMaterial)
-    center.position.y = 0.1
-    scene.add(center)
+    // Clock for delta time
+    const clock = new THREE.Clock()
+    clockRef.current = clock
 
-    // Simple ring placeholder
-    const ringGeometry = new THREE.RingGeometry(3.9, 4, 64)
-    const ringMaterial = new THREE.MeshBasicMaterial({
-      color: 0x22c55e,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.15,
-    })
-    const ring = new THREE.Mesh(ringGeometry, ringMaterial)
-    ring.rotation.x = -Math.PI / 2
-    ring.position.y = 0.01
-    scene.add(ring)
-
-    // Ground plane for reference
+    // Ground plane
     const groundGeometry = new THREE.PlaneGeometry(20, 20)
     const groundMaterial = new THREE.MeshBasicMaterial({
       color: 0x050a05,
@@ -103,11 +85,23 @@ export function MapView({
     ground.rotation.x = -Math.PI / 2
     scene.add(ground)
 
-    setIsReady(true)
+    // Initialize RadarScene (Phase 2)
+    const radarScene = new RadarScene(scene)
+    radarSceneRef.current = radarScene
+
+    // Initialize BlipParticleSystem (Phase 3)
+    const blipSystem = new BlipParticleSystem(scene, camera)
+    blipSystemRef.current = blipSystem
 
     // Animation loop
     const animate = () => {
       frameIdRef.current = requestAnimationFrame(animate)
+      const deltaTime = clock.getDelta()
+
+      // Update radar animations
+      radarSceneRef.current?.update(deltaTime)
+      blipSystemRef.current?.update(deltaTime)
+
       renderer.render(scene, camera)
     }
     animate()
@@ -115,9 +109,17 @@ export function MapView({
     // Cleanup
     return () => {
       cancelAnimationFrame(frameIdRef.current)
+
+      // Dispose radar scene and blip system
+      radarSceneRef.current?.dispose()
+      radarSceneRef.current = null
+      blipSystemRef.current?.dispose()
+      blipSystemRef.current = null
+
+      // Dispose renderer
       renderer.dispose()
 
-      // Dispose geometries and materials
+      // Dispose ground
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
           object.geometry.dispose()
@@ -137,6 +139,11 @@ export function MapView({
     }
   }, [])
 
+  // Update blip system when nearby users change
+  useEffect(() => {
+    blipSystemRef.current?.updateUsers(nearbyUsers)
+  }, [nearbyUsers])
+
   // Handle resize
   useEffect(() => {
     const handleResize = () => {
@@ -154,17 +161,26 @@ export function MapView({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Placeholder click handler (will be replaced in Phase 3 with raycasting)
+  // Click handler with raycasting
   const handleClick = useCallback(
-    (_event: React.MouseEvent) => {
-      if (!nearbyUsers.length || !onUserClick) return
+    (event: React.MouseEvent) => {
+      if (!containerRef.current || !blipSystemRef.current || !onUserClick) return
 
-      // For Phase 1: clicking anywhere triggers the first nearby user
-      // Phase 3 will implement proper raycasting
-      haptics.subtle()
-      onUserClick(nearbyUsers[0])
+      // Get normalized mouse coordinates
+      const mouse = BlipParticleSystem.getNormalizedMouse(
+        event.nativeEvent,
+        containerRef.current
+      )
+
+      // Raycast to find clicked user
+      const clickedUser = blipSystemRef.current.raycast(mouse)
+
+      if (clickedUser) {
+        haptics.subtle()
+        onUserClick(clickedUser)
+      }
     },
-    [nearbyUsers, onUserClick]
+    [onUserClick]
   )
 
   return (
