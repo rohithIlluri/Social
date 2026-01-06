@@ -202,13 +202,6 @@ export class BlipParticleSystem {
     }
 
     /**
-     * Get current users
-     */
-    getUsers(): NearbyUser[] {
-        return this.users
-    }
-
-    /**
      * Cleanup resources
      */
     dispose(): void {

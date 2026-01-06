@@ -1,6 +1,8 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { getInitials } from '@/utils/nameGenerator';
-import { bounceInVariants } from '@/utils/animations';
+import { memo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { getInitials } from '@/utils/nameGenerator'
+import { bounceInVariants } from '@/utils/animations'
+import { adjustColorBrightness } from '@/utils/colors'
 
 interface AvatarProps {
   nickname: string;
@@ -13,7 +15,7 @@ interface AvatarProps {
   animate?: boolean; // Whether to animate on mount
 }
 
-export function Avatar({
+export const Avatar = memo(function Avatar({
   nickname,
   color,
   size = 'md',
@@ -159,33 +161,5 @@ export function Avatar({
         />
       )}
     </motion.div>
-  );
-}
-
-/**
- * Helper function to adjust color brightness
- */
-function adjustColorBrightness(hex: string, percent: number): string {
-  // Remove # if present
-  hex = hex.replace('#', '');
-
-  // Convert to RGB
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-
-  // Adjust brightness
-  const adjust = (color: number) => {
-    const adjusted = color + (color * percent) / 100;
-    return Math.max(0, Math.min(255, Math.round(adjusted)));
-  };
-
-  const newR = adjust(r);
-  const newG = adjust(g);
-  const newB = adjust(b);
-
-  // Convert back to hex
-  const toHex = (n: number) => n.toString(16).padStart(2, '0');
-
-  return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
-}
+  )
+})

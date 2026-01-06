@@ -1,5 +1,7 @@
+import { memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getInitials } from '@/utils/nameGenerator'
+import { adjustColorBrightness } from '@/utils/colors'
 
 export type RevealStage = 'silhouette' | 'color' | 'partial' | 'full'
 
@@ -8,27 +10,6 @@ interface RevealAvatarProps {
   color: string
   stage: RevealStage
   size?: 'md' | 'lg' | 'xl' | '2xl'
-}
-
-// Adjust color brightness for gradient
-function adjustBrightness(hex: string, percent: number): string {
-  const num = parseInt(hex.replace('#', ''), 16)
-  const amt = Math.round(2.55 * percent)
-  const R = (num >> 16) + amt
-  const G = ((num >> 8) & 0x00ff) + amt
-  const B = (num & 0x0000ff) + amt
-
-  return (
-    '#' +
-    (
-      0x1000000 +
-      (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
-      (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
-      (B < 255 ? (B < 1 ? 0 : B) : 255)
-    )
-      .toString(16)
-      .slice(1)
-  )
 }
 
 const sizeClasses = {
@@ -54,7 +35,7 @@ const initialsSize = {
  * - partial: Color + initials + shimmer
  * - full: Full reveal with glow effect
  */
-export function RevealAvatar({
+export const RevealAvatar = memo(function RevealAvatar({
   nickname,
   color,
   stage,
@@ -111,7 +92,7 @@ export function RevealAvatar({
         animate={{
           background: isSilhouette
             ? 'linear-gradient(135deg, #3f3f46 0%, #27272a 100%)'
-            : `linear-gradient(135deg, ${color} 0%, ${adjustBrightness(color, -20)} 100%)`,
+            : `linear-gradient(135deg, ${color} 0%, ${adjustColorBrightness(color, -20)} 100%)`,
         }}
         transition={{ duration: 0.5, ease: [0, 0, 0.2, 1] }}
       >
@@ -176,7 +157,7 @@ export function RevealAvatar({
       </motion.div>
     </div>
   )
-}
+})
 
 /**
  * Map reveal level (0, 1, 3, 5, 10) to stage

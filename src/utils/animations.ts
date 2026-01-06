@@ -335,42 +335,6 @@ export const staggerChildVariants: Variants = {
 };
 
 // ============================================
-// Gesture Configurations
-// ============================================
-
-/**
- * Drag constraints
- */
-export const dragConstraints = {
-  // Vertical drag (for sheets)
-  vertical: {
-    top: 0,
-    left: 0,
-    right: 0,
-  },
-
-  // Horizontal drag (for cards)
-  horizontal: {
-    top: 0,
-    bottom: 0,
-  },
-};
-
-/**
- * Drag elastic
- */
-export const dragElastic = {
-  // Standard elastic
-  standard: 0.2,
-
-  // More elastic (for rubber band effect)
-  bouncy: 0.4,
-
-  // Less elastic
-  stiff: 0.1,
-};
-
-// ============================================
 // Helper Functions
 // ============================================
 
@@ -381,15 +345,6 @@ export const withDelay = (transition: Transition, delay: number): Transition => 
   ...transition,
   delay,
 });
-
-/**
- * Create a staggered list animation
- */
-export const createStaggerList = (itemCount: number, baseDelay = 0.05) => {
-  return Array.from({ length: itemCount }, (_, i) => ({
-    delay: i * baseDelay,
-  }));
-};
 
 /**
  * Pulse animation (for loading, attention)
