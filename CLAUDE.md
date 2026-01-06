@@ -73,11 +73,9 @@ npm run deploy   # Deploy to Firebase
 src/components/
 ├── map/
 │   ├── MapView.tsx         # Three.js radar scene (main entry)
-│   ├── three/              # [Phase 2/3] Three.js modules
-│   │   ├── RadarScene.ts   # [Phase 2] Scene manager: rings, sweep, grid
-│   │   └── BlipParticleSystem.ts  # [Phase 3] GPU particle blips
-│   ├── RadarOverlay.tsx    # [DEPRECATED] Legacy Framer Motion overlay
-│   └── RadarBlip.tsx       # [DEPRECATED] Legacy DOM blips
+│   └── three/              # Three.js modules
+│       ├── RadarScene.ts   # Scene manager: rings, sweep, grid, fog
+│       └── BlipParticleSystem.ts  # GPU particle blips with shaders
 ├── encounters/
 │   └── RevealModal.tsx     # Tap-to-reveal identity flow
 ├── common/
@@ -87,31 +85,30 @@ src/components/
 └── ...
 ```
 
-### Three.js Radar (Migration in Progress)
+### Three.js Radar (Complete)
 
-**Current State: Phase 1 Complete**
-- Three.js scaffold with basic scene
-- Proper cleanup on unmount
-- Navigation bugs fixed
+**RadarScene** (`three/RadarScene.ts`)
+- 4 concentric rings with subtle pulse animation
+- Rotating sweep line (4s full rotation, cone gradient)
+- 18x18 tactical grid overlay
+- Center point with glow effect
+- Fog-based vignette for depth
 
-**Phase 2** (Pending): RadarScene class
-- 4 concentric rings with subtle pulse
-- Rotating sweep line (4s rotation, cone gradient)
-- Grid overlay, vignette, fog
-- Center point with glow
-
-**Phase 3** (Pending): BlipParticleSystem
-- GPU-accelerated particle points
-- Trails behind moving blips
-- Pulse/glow effects via shaders
+**BlipParticleSystem** (`three/BlipParticleSystem.ts`)
+- GPU-accelerated particle points via BufferGeometry
+- Custom vertex/fragment shaders for glow
+- Pulse effects with time-based animation
 - Raycasting for click detection
+- Alpha based on reveal level (brighter = more revealed)
 
 ### Key Components
 
 **MapView** (`components/map/MapView.tsx`)
 - Three.js WebGLRenderer + PerspectiveCamera
+- Integrates RadarScene and BlipParticleSystem
 - Scene background: #0a1a0a (radar.screen)
 - Camera position: (0, 12, 3) for 3D depth
+- Click handling via raycasting
 - Proper cleanup: dispose renderer, cancel animation frame
 
 **RevealModal** (`components/encounters/RevealModal.tsx`)
