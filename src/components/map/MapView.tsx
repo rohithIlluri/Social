@@ -144,7 +144,7 @@ export function MapView({
     blipSystemRef.current?.updateUsers(nearbyUsers)
   }, [nearbyUsers])
 
-  // Handle resize
+  // Handle resize with ResizeObserver and visibility change
   useEffect(() => {
     const handleResize = () => {
       if (!containerRef.current || !rendererRef.current || !cameraRef.current) return
@@ -152,13 +152,50 @@ export function MapView({
       const width = containerRef.current.clientWidth
       const height = containerRef.current.clientHeight
 
+      // Skip if dimensions are invalid
+      if (width === 0 || height === 0) return
+
       cameraRef.current.aspect = width / height
       cameraRef.current.updateProjectionMatrix()
       rendererRef.current.setSize(width, height)
     }
 
+    // Handle visibility change (tab switch, minimize, etc.)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Resume clock and resize on next frame
+        clockRef.current?.start()
+        requestAnimationFrame(() => {
+          handleResize()
+        })
+      } else {
+        // Pause clock when hidden to prevent timing issues
+        clockRef.current?.stop()
+      }
+    }
+
+    // ResizeObserver for robust container size tracking
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize()
+    })
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current)
+    }
+
+    // Initial resize check after layout settles
+    requestAnimationFrame(() => {
+      handleResize()
+    })
+
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      resizeObserver.disconnect()
+    }
   }, [])
 
   // Click handler with raycasting
