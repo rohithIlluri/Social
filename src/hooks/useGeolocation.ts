@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { ref, set, onDisconnect, serverTimestamp } from 'firebase/database'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { ref, set, remove, onDisconnect, serverTimestamp } from 'firebase/database'
 import { realtimeDb } from '@/services/firebase'
 import { useUserStore } from '@/store/userStore'
 import { encode } from '@/utils/geohash'
@@ -13,8 +13,14 @@ interface GeolocationState {
   isTracking: boolean
 }
 
-export function useGeolocation() {
+interface UseGeolocationOptions {
+  autoStart?: boolean
+}
+
+export function useGeolocation(options: UseGeolocationOptions = {}) {
+  const { autoStart = false } = options
   const { user } = useUserStore()
+
   const [state, setState] = useState<GeolocationState>({
     latitude: null,
     longitude: null,
@@ -23,12 +29,42 @@ export function useGeolocation() {
     isTracking: false,
   })
 
+  // Store watchId in ref for proper cleanup
+  const watchIdRef = useRef<number | null>(null)
+  const lastGeohashRef = useRef<string | null>(null)
+
+  // Cleanup Firebase location
+  const cleanupFirebaseLocation = useCallback(async () => {
+    if (!user || !lastGeohashRef.current) return
+
+    const locationRef = ref(realtimeDb, `locations/${lastGeohashRef.current}/${user.id}`)
+    try {
+      await remove(locationRef)
+    } catch (error) {
+      console.error('Failed to clear location:', error)
+    }
+    lastGeohashRef.current = null
+  }, [user])
+
+  // Update Firebase location
   const updateFirebaseLocation = useCallback(
     async (lat: number, lng: number) => {
       if (!user) return
 
       const geohash = encode(lat, lng, 6) // ~610m precision
+
+      // If geohash changed, remove from old location first
+      if (lastGeohashRef.current && lastGeohashRef.current !== geohash) {
+        const oldLocationRef = ref(realtimeDb, `locations/${lastGeohashRef.current}/${user.id}`)
+        try {
+          await remove(oldLocationRef)
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+
       const locationRef = ref(realtimeDb, `locations/${geohash}/${user.id}`)
+      lastGeohashRef.current = geohash
 
       try {
         await set(locationRef, {
@@ -50,13 +86,19 @@ export function useGeolocation() {
     [user]
   )
 
+  // Start tracking - returns cleanup function
   const startTracking = useCallback(() => {
     if (!navigator.geolocation) {
       setState((prev) => ({
         ...prev,
         error: 'Geolocation is not supported by your browser',
       }))
-      return
+      return () => {}
+    }
+
+    // Don't start if already tracking
+    if (watchIdRef.current !== null) {
+      return () => {}
     }
 
     setState((prev) => ({ ...prev, isTracking: true, error: null }))
@@ -99,32 +141,54 @@ export function useGeolocation() {
       }
     )
 
+    watchIdRef.current = watchId
+
     return () => {
-      navigator.geolocation.clearWatch(watchId)
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current)
+        watchIdRef.current = null
+      }
       setState((prev) => ({ ...prev, isTracking: false }))
     }
   }, [updateFirebaseLocation])
 
+  // Stop tracking
   const stopTracking = useCallback(async () => {
-    if (!user || !state.latitude || !state.longitude) return
-
-    const geohash = encode(state.latitude, state.longitude, 6)
-    const locationRef = ref(realtimeDb, `locations/${geohash}/${user.id}`)
-
-    try {
-      await set(locationRef, null)
-    } catch (error) {
-      console.error('Failed to clear location:', error)
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current)
+      watchIdRef.current = null
     }
 
+    await cleanupFirebaseLocation()
     setState((prev) => ({ ...prev, isTracking: false }))
-  }, [user, state.latitude, state.longitude])
+  }, [cleanupFirebaseLocation])
 
-  // Handle page visibility
+  // Auto-start effect with proper cleanup
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && state.isTracking) {
-        stopTracking()
+    if (!autoStart || !user) return
+
+    const cleanup = startTracking()
+
+    return () => {
+      cleanup()
+      // Also clean up Firebase on unmount
+      if (lastGeohashRef.current && user) {
+        const locationRef = ref(realtimeDb, `locations/${lastGeohashRef.current}/${user.id}`)
+        remove(locationRef).catch(() => {
+          // Ignore cleanup errors on unmount
+        })
+      }
+    }
+  }, [autoStart, user, startTracking])
+
+  // Handle page visibility - pause tracking when hidden
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.hidden && watchIdRef.current !== null) {
+        await stopTracking()
+      } else if (!document.hidden && autoStart && user && watchIdRef.current === null) {
+        // Resume tracking when page becomes visible again
+        startTracking()
       }
     }
 
@@ -132,7 +196,7 @@ export function useGeolocation() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [state.isTracking, stopTracking])
+  }, [autoStart, user, startTracking, stopTracking])
 
   return {
     ...state,

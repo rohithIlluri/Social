@@ -28,7 +28,7 @@ function App() {
   // Show onboarding if not completed
   if (!isOnboarded) {
     return (
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="sync">
         <Routes location={location} key={location.pathname}>
           <Route
             path="/onboarding"
@@ -46,7 +46,7 @@ function App() {
 
   return (
     <div className="min-h-screen pb-20">
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="sync">
         <Routes location={location} key={location.pathname}>
           <Route
             path="/"

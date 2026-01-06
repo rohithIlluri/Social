@@ -68,6 +68,51 @@ export const haptics = {
       navigator.vibrate(5);
     }
   },
+
+  /**
+   * Radar ping - When a new user appears on the radar
+   */
+  radarPing: () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate([5, 30, 5]);
+    }
+  },
+
+  /**
+   * Subtle tap - Minimal feedback for minor interactions
+   */
+  subtle: () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(3);
+    }
+  },
+
+  /**
+   * Reveal unlock - Satisfying moment when identity is revealed
+   */
+  reveal: () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate([10, 20, 30]); // Ascending pattern
+    }
+  },
+
+  /**
+   * Connection made - When mutual interaction occurs
+   */
+  connection: () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate([20, 30, 20, 30, 40]);
+    }
+  },
+
+  /**
+   * Double tap confirmation - For important confirmations
+   */
+  doubleTap: () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate([8, 40, 8]);
+    }
+  },
 };
 
 // Check if haptics are available

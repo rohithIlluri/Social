@@ -14,7 +14,7 @@ interface UserState {
   setUser: (user: User | null) => void
   setLoading: (loading: boolean) => void
   updateUser: (updates: Partial<User>) => void
-  createGuestUser: (name: string) => User
+  createGuestUser: () => User
   completeOnboarding: () => void
   addXP: (amount: number) => void
   addBadge: (badgeId: string) => void
@@ -49,10 +49,10 @@ export const useUserStore = create<UserState>()(
         }
       },
 
-      createGuestUser: (name: string) => {
+      createGuestUser: () => {
         const newUser: User = {
           id: generateGuestId(),
-          nickname: name || generateNickname(),
+          nickname: generateNickname(), // Always auto-generate
           avatarColor: generateAvatarColor(),
           interests: [],
           level: 1,

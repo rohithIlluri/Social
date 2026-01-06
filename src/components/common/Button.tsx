@@ -41,11 +41,11 @@ export function Button({
   // Base styles - 44px minimum touch target
   const baseStyles = 'btn-base font-medium no-select flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden';
 
-  // Variant styles with gradients and shadows
+  // Variant styles with gradients and shadows - Radar green theme
   const variants = {
-    primary: 'gradient-sunrise text-white shadow-glow-sunrise hover:shadow-glow-sunrise/60',
-    secondary: 'glass-light text-white border border-white/10 hover:border-white/20',
-    ghost: 'bg-transparent text-slate-300 hover:bg-slate-800/50',
+    primary: 'gradient-radar text-white shadow-glow-radar hover:shadow-glow-radar-strong',
+    secondary: 'glass-radar text-white border border-radar-blip/20 hover:border-radar-blip/40',
+    ghost: 'bg-transparent text-obsidian-300 hover:bg-obsidian-800/50 hover:text-radar-blip',
     danger: 'bg-gradient-to-r from-error to-red-600 text-white shadow-lg hover:shadow-xl',
   };
 

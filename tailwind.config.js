@@ -76,6 +76,17 @@ export default {
         success: '#22c55e',
         error: '#ef4444',
         warning: '#eab308',
+
+        // Radar - military tech aesthetic
+        radar: {
+          screen: '#0a1a0a',
+          grid: 'rgba(34, 197, 94, 0.08)',
+          sweep: 'rgba(34, 197, 94, 0.15)',
+          blip: '#22c55e',
+          glow: 'rgba(34, 197, 94, 0.4)',
+          pulse: 'rgba(34, 197, 94, 0.2)',
+          ring: 'rgba(34, 197, 94, 0.12)',
+        },
       },
 
       // SF Pro-inspired typography - BOLDER hierarchy
@@ -183,6 +194,16 @@ export default {
 
         // Shimmer - subtle loading
         'shimmer': 'shimmer 2.5s ease-in-out infinite',
+
+        // Radar - military tech animations
+        'radar-sweep': 'radar-sweep 4s linear infinite',
+        'radar-ping': 'radar-ping 2s ease-out infinite',
+        'blip-appear': 'blip-appear 0.6s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
+        'blip-pulse': 'blip-pulse 2s ease-in-out infinite',
+
+        // Reveal - premium unlock moments
+        'reveal-expand': 'reveal-expand 0.5s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
+        'reveal-shimmer': 'reveal-shimmer 0.8s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
       },
 
       keyframes: {
@@ -259,6 +280,35 @@ export default {
           '50%': { opacity: '1' },
           '100%': { transform: 'translateX(100%)', opacity: '0' },
         },
+
+        // Radar keyframes
+        'radar-sweep': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        'radar-ping': {
+          '0%': { transform: 'scale(0.8)', opacity: '0.8' },
+          '70%': { transform: 'scale(1)', opacity: '0.4' },
+          '100%': { transform: 'scale(1.5)', opacity: '0' },
+        },
+        'blip-appear': {
+          '0%': { transform: 'scale(0)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'blip-pulse': {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(34, 197, 94, 0.4)' },
+          '50%': { boxShadow: '0 0 0 8px rgba(34, 197, 94, 0)' },
+        },
+
+        // Reveal keyframes
+        'reveal-expand': {
+          '0%': { transform: 'scale(0.95)', opacity: '0', filter: 'blur(4px)' },
+          '100%': { transform: 'scale(1)', opacity: '1', filter: 'blur(0)' },
+        },
+        'reveal-shimmer': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(200%)' },
+        },
       },
 
       // Shadows - softer, more natural
@@ -270,6 +320,8 @@ export default {
         'glow-sunrise': '0 0 32px rgba(255, 159, 74, 0.4)',
         'glow-connect': '0 0 32px rgba(20, 184, 166, 0.4)',
         'glow-encounter': '0 0 32px rgba(236, 72, 153, 0.4)',
+        'glow-radar': '0 0 12px rgba(34, 197, 94, 0.5)',
+        'glow-radar-strong': '0 0 20px rgba(34, 197, 94, 0.6), 0 0 40px rgba(34, 197, 94, 0.3)',
         'inner': 'inset 0 2px 4px rgba(0, 0, 0, 0.06)',
         'up': '0 -4px 24px rgba(0, 0, 0, 0.08)',
       },
