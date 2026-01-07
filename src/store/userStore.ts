@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { signInAnonymously, signOut as firebaseSignOut } from 'firebase/auth'
+import { auth } from '@/services/firebase'
 import type { User } from '@/types'
 import { generateNickname, generateAvatarColor } from '@/utils/nameGenerator'
 import { DEFAULT_RADIUS_METERS } from '@/utils/constants'
@@ -14,16 +16,11 @@ interface UserState {
   setUser: (user: User | null) => void
   setLoading: (loading: boolean) => void
   updateUser: (updates: Partial<User>) => void
-  createGuestUser: () => User
+  createGuestUser: () => Promise<User>
   completeOnboarding: () => void
   addXP: (amount: number) => void
   addBadge: (badgeId: string) => void
-  logout: () => void
-}
-
-// Generate a random ID for guest users
-function generateGuestId(): string {
-  return 'guest_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
+  logout: () => Promise<void>
 }
 
 export const useUserStore = create<UserState>()(
@@ -49,9 +46,16 @@ export const useUserStore = create<UserState>()(
         }
       },
 
-      createGuestUser: () => {
+      createGuestUser: async () => {
+        set({ isLoading: true })
+
+        // Sign in anonymously with Firebase to get a verified user ID
+        // This enables secure Socket.io authentication for profile exchange
+        const credential = await signInAnonymously(auth)
+        const firebaseUid = credential.user.uid
+
         const newUser: User = {
-          id: generateGuestId(),
+          id: firebaseUid, // Use Firebase UID for secure authentication
           nickname: generateNickname(), // Always auto-generate
           avatarColor: generateAvatarColor(),
           interests: [],
@@ -92,12 +96,16 @@ export const useUserStore = create<UserState>()(
         }
       },
 
-      logout: () => set({
-        user: null,
-        isAuthenticated: false,
-        isOnboarded: false,
-        isLoading: false
-      }),
+      logout: async () => {
+        // Sign out from Firebase
+        await firebaseSignOut(auth)
+        set({
+          user: null,
+          isAuthenticated: false,
+          isOnboarded: false,
+          isLoading: false,
+        })
+      },
     }),
     {
       name: 'friendcatcher-user',

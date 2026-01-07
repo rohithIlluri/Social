@@ -1,0 +1,85 @@
+{
+  "rules": {
+    "locations": {
+      "$geohash": {
+        "$userId": {
+          ".read": "auth != null",
+          ".write": "auth != null && auth.uid === $userId",
+          ".validate": "newData.hasChildren(['lat', 'lng', 'timestamp', 'active', 'radius'])",
+          "lat": {
+            ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+          },
+          "lng": {
+            ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+          },
+          "timestamp": {
+            ".validate": "newData.isNumber()"
+          },
+          "active": {
+            ".validate": "newData.isBoolean()"
+          },
+          "radius": {
+            ".validate": "newData.isNumber() && newData.val() >= 50 && newData.val() <= 5000"
+          }
+        }
+      }
+    },
+
+    "encounters": {
+      "$encounterId": {
+        ".read": "auth != null && (data.child('users/0').val() === auth.uid || data.child('users/1').val() === auth.uid)",
+        ".write": "auth != null && ((!data.exists() && newData.child('users').hasChildren() && (newData.child('users/0').val() === auth.uid || newData.child('users/1').val() === auth.uid)) || (data.exists() && (data.child('users/0').val() === auth.uid || data.child('users/1').val() === auth.uid)))",
+        "users": {
+          ".validate": "newData.hasChildren(['0', '1'])"
+        },
+        "location": {
+          ".validate": "newData.hasChildren(['lat', 'lng'])"
+        },
+        "startedAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "active": {
+          ".validate": "newData.isBoolean()"
+        },
+        "interactionCount": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "participants": {
+          "$participantId": {
+            ".write": "auth.uid === $participantId",
+            "connected": {
+              ".validate": "newData.isBoolean()"
+            }
+          }
+        }
+      }
+    },
+
+    "chats": {
+      "$encounterId": {
+        ".read": "auth != null && root.child('encounters').child($encounterId).exists() && (root.child('encounters').child($encounterId).child('users/0').val() === auth.uid || root.child('encounters').child($encounterId).child('users/1').val() === auth.uid)",
+        ".write": "auth != null && root.child('encounters').child($encounterId).exists() && (root.child('encounters').child($encounterId).child('users/0').val() === auth.uid || root.child('encounters').child($encounterId).child('users/1').val() === auth.uid)",
+        "active": {
+          ".validate": "newData.isBoolean()"
+        },
+        "messages": {
+          "$messageId": {
+            ".validate": "newData.hasChildren(['sender', 'text', 'timestamp'])",
+            "sender": {
+              ".validate": "newData.val() === auth.uid"
+            },
+            "text": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 1000"
+            },
+            "timestamp": {
+              ".validate": "newData.isNumber()"
+            }
+          }
+        }
+      }
+    },
+
+    ".read": false,
+    ".write": false
+  }
+}

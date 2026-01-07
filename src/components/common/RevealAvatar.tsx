@@ -6,11 +6,15 @@ import { adjustColorBrightness } from '@/utils/colors'
 export type RevealStage = 'silhouette' | 'color' | 'partial' | 'full'
 
 interface RevealAvatarProps {
-  nickname: string
-  color: string
+  nickname?: string  // Optional - may not be available until Socket.io exchange
+  color?: string     // Optional - may not be available until Socket.io exchange
   stage: RevealStage
   size?: 'md' | 'lg' | 'xl' | '2xl'
 }
+
+// Default values for when profile isn't loaded yet
+const DEFAULT_NICKNAME = 'Anonymous'
+const DEFAULT_COLOR = '#6b7280' // obsidian-500
 
 const sizeClasses = {
   md: 'w-16 h-16',
@@ -36,12 +40,15 @@ const initialsSize = {
  * - full: Full reveal with glow effect
  */
 export const RevealAvatar = memo(function RevealAvatar({
-  nickname,
-  color,
+  nickname = DEFAULT_NICKNAME,
+  color = DEFAULT_COLOR,
   stage,
   size = 'xl',
 }: RevealAvatarProps) {
-  const initials = getInitials(nickname)
+  // Use defaults if profile not yet loaded
+  const displayNickname = nickname || DEFAULT_NICKNAME
+  const displayColor = color || DEFAULT_COLOR
+  const initials = getInitials(displayNickname)
   const isSilhouette = stage === 'silhouette'
   const showColor = stage !== 'silhouette'
   const showInitials = stage === 'partial' || stage === 'full'
@@ -59,7 +66,7 @@ export const RevealAvatar = memo(function RevealAvatar({
             transition={{ duration: 0.5, ease: [0, 0, 0.2, 1] }}
             className="absolute -inset-3 rounded-full"
             style={{
-              background: `radial-gradient(circle, ${color}50 0%, transparent 70%)`,
+              background: `radial-gradient(circle, ${displayColor}50 0%, transparent 70%)`,
             }}
           />
         )}
@@ -92,7 +99,7 @@ export const RevealAvatar = memo(function RevealAvatar({
         animate={{
           background: isSilhouette
             ? 'linear-gradient(135deg, #3f3f46 0%, #27272a 100%)'
-            : `linear-gradient(135deg, ${color} 0%, ${adjustColorBrightness(color, -20)} 100%)`,
+            : `linear-gradient(135deg, ${displayColor} 0%, ${adjustColorBrightness(displayColor, -20)} 100%)`,
         }}
         transition={{ duration: 0.5, ease: [0, 0, 0.2, 1] }}
       >

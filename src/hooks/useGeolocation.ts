@@ -67,13 +67,13 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
       lastGeohashRef.current = geohash
 
       try {
+        // Anonymous location data - no PII (nickname/avatarColor)
+        // Profile data exchanged via Socket.io peer-to-peer
         await set(locationRef, {
           lat,
           lng,
           timestamp: serverTimestamp(),
           active: true,
-          nickname: user.nickname,
-          avatarColor: user.avatarColor,
           radius: user.discoveryRadius,
         })
 

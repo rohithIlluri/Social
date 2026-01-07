@@ -5,8 +5,8 @@ import { bounceInVariants } from '@/utils/animations'
 import { adjustColorBrightness } from '@/utils/colors'
 
 interface AvatarProps {
-  nickname: string;
-  color: string;
+  nickname?: string;  // Optional - may not be available until Socket.io exchange
+  color?: string;     // Optional - may not be available until Socket.io exchange
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   showInitials?: boolean;
   isSilhouette?: boolean;
@@ -15,9 +15,13 @@ interface AvatarProps {
   animate?: boolean; // Whether to animate on mount
 }
 
+// Default values for when profile isn't loaded yet
+const DEFAULT_NICKNAME = 'Anonymous'
+const DEFAULT_COLOR = '#6b7280' // obsidian-500
+
 export const Avatar = memo(function Avatar({
-  nickname,
-  color,
+  nickname = DEFAULT_NICKNAME,
+  color = DEFAULT_COLOR,
   size = 'md',
   showInitials = true,
   isSilhouette = false,
@@ -25,6 +29,10 @@ export const Avatar = memo(function Avatar({
   className = '',
   animate = false,
 }: AvatarProps) {
+  // Use defaults if profile not yet loaded
+  const displayNickname = nickname || DEFAULT_NICKNAME
+  const displayColor = color || DEFAULT_COLOR
+
   const sizes = {
     sm: 'w-8 h-8 text-xs',
     md: 'w-12 h-12 text-sm',
@@ -61,12 +69,12 @@ export const Avatar = memo(function Avatar({
   const getGradient = () => {
     if (revealLevel === 1) {
       // Level 1: Just color gradient, no initials
-      return `linear-gradient(135deg, ${color} 0%, ${adjustColorBrightness(color, -20)} 100%)`;
+      return `linear-gradient(135deg, ${displayColor} 0%, ${adjustColorBrightness(displayColor, -20)} 100%)`;
     } else if (revealLevel >= 3) {
       // Level 3+: Full gradient with potential enhancements
-      return `linear-gradient(135deg, ${color} 0%, ${adjustColorBrightness(color, -20)} 100%)`;
+      return `linear-gradient(135deg, ${displayColor} 0%, ${adjustColorBrightness(displayColor, -20)} 100%)`;
     }
-    return color;
+    return displayColor;
   };
 
   // Determine if we should show border glow (Level 5+)
@@ -91,7 +99,7 @@ export const Avatar = memo(function Avatar({
         `}
         style={{
           background: getGradient(),
-          ...(showGlow && !showRainbow ? { '--tw-ring-color': color } as any : {}),
+          ...(showGlow && !showRainbow ? { '--tw-ring-color': displayColor } as any : {}),
         }}
       >
         {/* Rainbow ring for Level 10 */}
@@ -123,7 +131,7 @@ export const Avatar = memo(function Avatar({
               className="relative z-10"
               style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)' }}
             >
-              {getInitials(nickname)}
+              {getInitials(displayNickname)}
             </motion.span>
           )}
 
@@ -154,7 +162,7 @@ export const Avatar = memo(function Avatar({
           style={{
             background: showRainbow
               ? 'linear-gradient(90deg, #fb923c, #ec4899, #2dd4bf, #fb923c)'
-              : color,
+              : displayColor,
             animation: showRainbow ? 'gradient-rotate 3s linear infinite' : undefined,
             backgroundSize: showRainbow ? '300% 300%' : undefined,
           }}

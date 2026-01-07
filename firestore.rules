@@ -1,0 +1,11 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Firestore not used - ephemeral architecture uses RTDB only
+    // All user data is ephemeral and stored in Realtime Database
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

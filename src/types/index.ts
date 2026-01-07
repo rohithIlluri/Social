@@ -1,4 +1,13 @@
-// User types
+/**
+ * FriendCatcher Types
+ *
+ * Privacy-First Architecture:
+ * - User profiles stored in localStorage only (never sent to server)
+ * - All server data is ephemeral (auto-deleted when users disconnect)
+ * - No persistent relationships or chat history
+ */
+
+// User types (stored in localStorage only - never persisted to server)
 export interface User {
   id: string
   email?: string
@@ -21,7 +30,7 @@ export interface UserLocation {
   active: boolean
 }
 
-// Encounter types
+// Encounter types (ephemeral - stored in RTDB, auto-deleted)
 export interface Encounter {
   id: string
   users: [string, string]
@@ -31,20 +40,22 @@ export interface Encounter {
   }
   startedAt: Date
   interactionCount: number
-  status: 'active' | 'ended'
+  active: boolean
 }
 
 export interface NearbyUser {
   id: string
-  nickname: string
-  avatarColor: string
   distance: number // in meters
   revealLevel: number
+  // Profile fields - optional (fetched via Socket.io peer-to-peer)
+  // Undefined until profile is exchanged
+  nickname?: string
+  avatarColor?: string
   interests?: string[]
   realName?: string
 }
 
-// Interaction types
+// Interaction types (used in-memory only, not persisted)
 export type InteractionType = 'reaction' | 'icebreaker' | 'game'
 
 export interface Interaction {
@@ -73,14 +84,7 @@ export interface GameData {
   result?: 'win' | 'lose' | 'draw'
 }
 
-// Chat types
-export interface Chat {
-  id: string
-  participants: [string, string]
-  lastMessage: string
-  lastMessageAt: Date
-}
-
+// Message types (ephemeral - stored in RTDB, auto-deleted with encounter)
 export interface Message {
   id: string
   sender: string
@@ -88,17 +92,7 @@ export interface Message {
   timestamp: Date
 }
 
-// Friendship types
-export interface Friendship {
-  id: string
-  users: [string, string]
-  level: number
-  totalInteractions: number
-  firstEncounter: Date
-  isFavorite: boolean
-}
-
-// Gamification types
+// Gamification types (stored in localStorage only)
 export interface Badge {
   id: string
   name: string

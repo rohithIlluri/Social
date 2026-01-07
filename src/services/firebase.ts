@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
 import { getDatabase } from 'firebase/database'
+// Firestore removed - ephemeral architecture uses RTDB only
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -20,10 +20,7 @@ const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const googleProvider = new GoogleAuthProvider()
 
-// Firestore (for users, encounters, interactions, chats, friendships)
-export const db = getFirestore(app)
-
-// Realtime Database (for live locations)
+// Realtime Database (for all ephemeral data: locations, encounters, chats)
 export const realtimeDb = getDatabase(app)
 
 export default app

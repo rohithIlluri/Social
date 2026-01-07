@@ -137,7 +137,7 @@ export function RevealModal({ user, isOpen, onClose, onInteract }: RevealModalPr
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.4, ease: [0, 0, 0.2, 1] }}
               >
-                {stage === 'silhouette' ? (
+                {stage === 'silhouette' || !user.nickname ? (
                   <div className="h-7 w-32 mx-auto bg-obsidian-700/50 rounded-full animate-pulse" />
                 ) : (
                   <h2 className="text-title2 text-white">{user.nickname}</h2>
