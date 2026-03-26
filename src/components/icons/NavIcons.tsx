@@ -90,6 +90,36 @@ export function PeopleIcon({ filled = false, ...props }: IconProps) {
   )
 }
 
+export function RankIcon({ filled = false, ...props }: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      {filled ? (
+        <>
+          <rect x="2" y="13" width="5" height="9" rx="1.5" fill="currentColor" />
+          <rect x="9.5" y="8" width="5" height="14" rx="1.5" fill="currentColor" />
+          <rect x="17" y="3" width="5" height="19" rx="1.5" fill="currentColor" />
+          <circle cx="4.5" cy="10" r="2" fill="currentColor" />
+          <circle cx="12" cy="5" r="2" fill="currentColor" />
+          <circle cx="19.5" cy="1.5" r="1.5" fill="currentColor" />
+        </>
+      ) : (
+        <>
+          <rect x="2" y="13" width="5" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.75" />
+          <rect x="9.5" y="8" width="5" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.75" />
+          <rect x="17" y="3" width="5" height="19" rx="1.5" stroke="currentColor" strokeWidth="1.75" />
+        </>
+      )}
+    </svg>
+  )
+}
+
 export function PersonIcon({ filled = false, ...props }: IconProps) {
   return (
     <svg

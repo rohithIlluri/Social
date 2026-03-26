@@ -8,6 +8,7 @@ import { Home } from '@/pages/Home'
 import { Friends } from '@/pages/Friends'
 import { Profile } from '@/pages/Profile'
 import { Onboarding } from '@/pages/Onboarding'
+import { InstagramRank } from '@/pages/InstagramRank'
 
 function App() {
   const { isOnboarded, isLoading } = useUserStore()
@@ -69,6 +70,14 @@ function App() {
             element={
               <PageTransition>
                 <Profile />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/rank"
+            element={
+              <PageTransition>
+                <InstagramRank />
               </PageTransition>
             }
           />

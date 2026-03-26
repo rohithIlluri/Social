@@ -77,6 +77,39 @@ export default {
         error: '#ef4444',
         warning: '#eab308',
 
+        // tbh-style palette — warm, vibrant, playful
+        tbh: {
+          candy: '#FF6B9D',
+          violet: '#7B61FF',
+          tangerine: '#FF8C42',
+          lemon: '#FFD23F',
+          mint: '#3BCEAC',
+          sky: '#00C2E0',
+          lavender: '#C4B5FD',
+          rose: '#FB7185',
+          peach: '#FDBA74',
+          grape: '#A78BFA',
+          // Gradient stops (used inline as bg)
+          'g-warm-from': '#FF6B9D',
+          'g-warm-to': '#FF8C42',
+          'g-royal-from': '#7B61FF',
+          'g-royal-to': '#FF6B9D',
+          'g-ocean-from': '#3BCEAC',
+          'g-ocean-to': '#00C2E0',
+          'g-gold-from': '#FFD23F',
+          'g-gold-to': '#FF8C42',
+          'g-berry-from': '#A78BFA',
+          'g-berry-to': '#FB7185',
+        },
+
+        // Gem rewards — tiered rarity
+        gem: {
+          common: '#3BCEAC',
+          rare: '#7B61FF',
+          epic: '#FF6B9D',
+          legendary: '#FFD23F',
+        },
+
         // Radar - military tech aesthetic
         radar: {
           screen: '#0a1a0a',
@@ -204,6 +237,16 @@ export default {
         // Reveal - premium unlock moments
         'reveal-expand': 'reveal-expand 0.5s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
         'reveal-shimmer': 'reveal-shimmer 0.8s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
+
+        // tbh-style animations
+        'gem-pop': 'gem-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        'gem-float': 'gem-float 1.2s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
+        'card-swipe-left': 'card-swipe-left 0.35s cubic-bezier(0.4, 0, 1, 1) forwards',
+        'card-swipe-right': 'card-swipe-right 0.35s cubic-bezier(0.4, 0, 1, 1) forwards',
+        'card-enter': 'card-enter 0.4s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
+        'rank-badge': 'rank-badge 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        'confetti-burst': 'confetti-burst 0.8s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
+        'vote-pulse': 'vote-pulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
       },
 
       keyframes: {
@@ -298,6 +341,43 @@ export default {
         'blip-pulse': {
           '0%, 100%': { boxShadow: '0 0 0 0 rgba(34, 197, 94, 0.4)' },
           '50%': { boxShadow: '0 0 0 8px rgba(34, 197, 94, 0)' },
+        },
+
+        // tbh keyframes
+        'gem-pop': {
+          '0%': { transform: 'scale(0) rotate(-15deg)', opacity: '0' },
+          '60%': { transform: 'scale(1.2) rotate(5deg)' },
+          '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
+        },
+        'gem-float': {
+          '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+          '100%': { transform: 'translateY(-80px) scale(0.5)', opacity: '0' },
+        },
+        'card-swipe-left': {
+          '0%': { transform: 'translateX(0) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'translateX(-120%) rotate(-15deg)', opacity: '0' },
+        },
+        'card-swipe-right': {
+          '0%': { transform: 'translateX(0) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'translateX(120%) rotate(15deg)', opacity: '0' },
+        },
+        'card-enter': {
+          '0%': { transform: 'scale(0.88) translateY(20px)', opacity: '0' },
+          '100%': { transform: 'scale(1) translateY(0)', opacity: '1' },
+        },
+        'rank-badge': {
+          '0%': { transform: 'scale(0)', opacity: '0' },
+          '60%': { transform: 'scale(1.15)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'confetti-burst': {
+          '0%': { transform: 'scale(0)', opacity: '1' },
+          '100%': { transform: 'scale(3)', opacity: '0' },
+        },
+        'vote-pulse': {
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(0.94)' },
+          '100%': { transform: 'scale(1)' },
         },
 
         // Reveal keyframes
