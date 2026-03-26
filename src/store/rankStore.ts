@@ -1,12 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type {
-  InstagramProfile,
-  Poll,
-  Vote,
-  RankEntry,
-  Gem,
-} from '@/types/rank'
+import type { InstagramProfile, Poll, Vote, RankEntry, Gem, PollCategory } from '@/types/rank'
 import {
   generatePolls,
   generateLeaderboard,
@@ -14,6 +8,7 @@ import {
   getNetworkProfiles,
 } from '@/services/instagramMock'
 
+// ─── State shape ───────────────────────────────────────────────────────────────
 interface RankState {
   // Connection
   isConnected: boolean
@@ -27,7 +22,6 @@ interface RankState {
 
   // Rankings
   leaderboard: RankEntry[]
-  myRank: RankEntry | null
 
   // Gems
   gems: Gem[]
@@ -37,12 +31,12 @@ interface RankState {
   connect: (profile: InstagramProfile) => void
   disconnect: () => void
   advanceToNextPoll: () => void
-  submitVote: (pollId: string, questionId: string, category: import('@/types/rank').PollCategory, votedForId: string) => void
+  resetPollIndex: () => void
+  submitVote: (pollId: string, questionId: string, category: PollCategory, votedForId: string) => void
   markGemsRead: () => void
-  addGem: (gem: Gem) => void
-  refreshLeaderboard: () => void
 }
 
+// ─── Store ────────────────────────────────────────────────────────────────────
 export const useRankStore = create<RankState>()(
   persist(
     (set, get) => ({
@@ -53,7 +47,6 @@ export const useRankStore = create<RankState>()(
       currentPollIndex: 0,
       votes: [],
       leaderboard: [],
-      myRank: null,
       gems: [],
       newGemCount: 0,
 
@@ -62,7 +55,6 @@ export const useRankStore = create<RankState>()(
         const polls = generatePolls(network)
         const leaderboard = generateLeaderboard(network, profile)
         const gems = generateGems()
-        const myRank = leaderboard.find(e => e.profile.id === profile.id) ?? null
 
         set({
           isConnected: true,
@@ -70,14 +62,14 @@ export const useRankStore = create<RankState>()(
           network,
           polls,
           currentPollIndex: 0,
+          votes: [],
           leaderboard,
-          myRank,
           gems,
           newGemCount: gems.length,
         })
       },
 
-      disconnect: () => {
+      disconnect: () =>
         set({
           isConnected: false,
           currentUser: null,
@@ -86,23 +78,20 @@ export const useRankStore = create<RankState>()(
           currentPollIndex: 0,
           votes: [],
           leaderboard: [],
-          myRank: null,
           gems: [],
           newGemCount: 0,
-        })
-      },
+        }),
 
       advanceToNextPoll: () => {
         const { currentPollIndex, polls } = get()
-        if (currentPollIndex < polls.length - 1) {
-          set({ currentPollIndex: currentPollIndex + 1 })
-        } else {
-          // Cycle back
-          set({ currentPollIndex: 0 })
-        }
+        const next = currentPollIndex + 1
+        // Cycle back silently after last poll (AllVotedState handles the UI)
+        set({ currentPollIndex: next < polls.length ? next : polls.length })
       },
 
-      submitVote: (pollId, questionId, category, votedForId) => {
+      submitVote: (pollId: string, questionId: string, category: PollCategory, votedForId: string) => {
+        const { votes, leaderboard } = get()
+
         const vote: Vote = {
           pollId,
           questionId,
@@ -110,11 +99,11 @@ export const useRankStore = create<RankState>()(
           votedForId,
           votedAt: new Date(),
         }
-        const { votes, leaderboard } = get()
 
-        // Update leaderboard gem count for voted person
-        const updated = leaderboard.map(entry => {
-          if (entry.profile.id === votedForId) {
+        // Optimistically update the voted person's gem count in the leaderboard
+        const updated = leaderboard
+          .map((entry) => {
+            if (entry.profile.id !== votedForId) return entry
             return {
               ...entry,
               gemCount: entry.gemCount + 1,
@@ -123,36 +112,23 @@ export const useRankStore = create<RankState>()(
                 [category]: (entry.categoryBreakdown[category] ?? 0) + 1,
               },
             }
-          }
-          return entry
-        }).sort((a, b) => b.gemCount - a.gemCount)
-           .map((entry, i) => ({ ...entry, rank: i + 1 }))
+          })
+          .sort((a, b) => b.gemCount - a.gemCount)
+          .map((entry, i) => ({ ...entry, rank: i + 1 }))
 
         set({ votes: [...votes, vote], leaderboard: updated })
       },
 
-      markGemsRead: () => {
-        set({ newGemCount: 0 })
-      },
+      resetPollIndex: () => set({ currentPollIndex: 0 }),
 
-      addGem: (gem: Gem) => {
-        const { gems, newGemCount } = get()
-        set({ gems: [gem, ...gems], newGemCount: newGemCount + 1 })
-      },
-
-      refreshLeaderboard: () => {
-        const { network, currentUser } = get()
-        if (!currentUser) return
-        const leaderboard = generateLeaderboard(network, currentUser)
-        const myRank = leaderboard.find(e => e.profile.id === currentUser.id) ?? null
-        set({ leaderboard, myRank })
-      },
+      markGemsRead: () => set({ newGemCount: 0 }),
     }),
     {
-      name: 'rank-store',
+      name: 'linkrank-store-v2',
       partialize: (state) => ({
         isConnected: state.isConnected,
         currentUser: state.currentUser,
+        // Do NOT persist polls/leaderboard — always regenerate on connect
         votes: state.votes,
         gems: state.gems,
       }),
